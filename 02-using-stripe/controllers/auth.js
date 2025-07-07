@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
       api_key:
-        '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'
+       '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'
     }
   })
 );
@@ -209,12 +209,14 @@ exports.postReset = (req, res, next) => {
         res.redirect('/');
         transporter.sendMail({
           to: req.body.email,
-          from: 'shop@node-complete.com',
+          from: 'vina.patil@neosofttech.com',
           subject: 'Password reset',
           html: `
             <p>You requested a password reset</p>
             <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
-          `
+            <p>not able to see above link? copy and paste below link in browser.
+            http://localhost:3000/reset/${token} </p>
+            `
         });
       })
       .catch(err => {
