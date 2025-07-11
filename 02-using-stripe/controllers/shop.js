@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const stripe = require('stripe')('sk_test_51Ri7yeRh2ABojqq4bCM7Rjw0L39QpFZQnFn3nbTLkGxrdaZOPPHiGCKRhbOjswzchzfqwyYNCw2CbhhV76E1Wl4v00K8YSn9nk');
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const PDFDocument = require('pdfkit');
 
@@ -180,25 +180,33 @@ exports.getCheckout = (req, res, next) => {
       return stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: products.map(p => {
-
-         createProductWithPrice(p.productId.title,p.productId.price).then(({productId,priceId})=>{
-          console.log(productId);
-          console.log(priceId);
-         })
-
-         /*  return {
-            name: p.productId.title,
-            description: p.productId.description,
-            price: p.productId.price * 100,
-            currency: 'usd',
+          return {
+            //name: p.productId.title,
+           // description: p.productId.description,
+             price: async ()=>{
+              console.log("in async arrow function");
+              const price = await stripe.prices.create({
+              unit_amount: priceInINR * 100, // Stripe uses paise for INR (100 INR = 10000)
+              currency: 'inr',
+              product: async ()=>{
+                 const product=await stripe.products.create({
+                    name: p.productId.title,
+                  })
+                  return product.id
+              }
+              });
+              console.log(price.id);
+              return price.id
+            },
+           // currency: 'usd',
             quantity: p.quantity
-          }; */
+          };
         }),
-     /*    success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
-        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel' */
+        success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
+        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
       });
     })
-   /*  .then(session => {
+    .then(session => {
       res.render('shop/checkout', {
         path: '/checkout',
         pageTitle: 'Checkout',
@@ -206,14 +214,14 @@ exports.getCheckout = (req, res, next) => {
         totalSum: total,
         sessionId: session.id
       });
-    }) */
+    })
     .catch(err => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
     });
 };
-
+ 
 
 
 
