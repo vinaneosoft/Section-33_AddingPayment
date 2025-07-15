@@ -21,6 +21,7 @@ const privateKey = fs.readFileSync('server.key');
 const certificate = fs.readFileSync('server.cert');
  
 
+
 const MONGODB_URI =
   `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.nhepvqi.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -52,7 +53,7 @@ const fileFilter = (req, file, cb) => {
     cb(null, false);
   }
 };
-
+app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 

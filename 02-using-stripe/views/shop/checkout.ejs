@@ -18,19 +18,9 @@
                 <h2>Total: <%= totalSum %></h2>
             </div>
             <div class="centered">
-                <button id="order-btn" class="btn">ORDER</button>
+                <button id="order-btn" data-session-id="<%= sessionId %>">ORDER</button>
                 <script src="https://js.stripe.com/v3/"></script>
-                <script>
-                    var stripe = Stripe('pk_test_51Ri7yeRh2ABojqq4FFKrEPKCxswsC1QAIngnplOdo9L89tKgbtzKfrtjHrxIzSP3eMla4n23kEBqWhIKfh52ShFT00o1wR5QZr');
-                    var orderBtn = document.getElementById('order-btn');
-                    orderBtn.addEventListener('click', async function() {
-                    console.log("button clicked......");
-                    
-                    const res= await stripe.redirectToCheckout({
-                            sessionId: '<%= sessionId %>'
-                        });
-                    console.log(res);
-                    });
+                <script src="/js/checkout.js"></script>
                 </script>
             </div>
         </main>
