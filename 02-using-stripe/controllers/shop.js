@@ -140,68 +140,35 @@ exports.postCartDeleteProduct = (req, res, next) => {
     });
 };
 
-async function createProductWithPrice(name, priceInINR) {
-  try {
-    // Create Product
-    const product = await stripe.products.create({
-      name: name,
-    });
-
-    // Create Price
-    const price = await stripe.prices.create({
-      unit_amount: priceInINR * 100, // Stripe uses paise for INR (100 INR = 10000)
-      currency: 'inr',
-      product: product.id,
-    });
-
-    return {
-      productId: product.id,
-      priceId: price.id,
-    };
-  } catch (err) {
-    console.error('Stripe error:', err);
-    throw err;
-  }
-}
 
 exports.getCheckout = (req, res, next) => {
   let products;
   let total = 0;
   req.user
     .populate('cart.items.productId')
-   
     .then(user => {
       products = user.cart.items;
       total = 0;
       products.forEach(p => {
         total += p.quantity * p.productId.price;
       });
- 
+      const line_items=products.map((p)=>{
+       return {
+          price_data:{
+            currency:'inr',
+            product_data:{
+              name:p.productId.title
+            },
+            unit_amount:p.productId.price *100
+          },
+          quantity:p.quantity
+        }
+      }
+      );
       return stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: products.map(p => {
-          return {
-            //name: p.productId.title,
-           // description: p.productId.description,
-             price: async ()=>{
-              console.log("in async arrow function");
-              const price = await stripe.prices.create({
-              unit_amount: priceInINR * 100, // Stripe uses paise for INR (100 INR = 10000)
-              currency: 'inr',
-              product: async ()=>{
-                 const product=await stripe.products.create({
-                    name: p.productId.title,
-                  })
-                  return product.id
-              }
-              });
-              console.log(price.id);
-              return price.id
-            },
-           // currency: 'usd',
-            quantity: p.quantity
-          };
-        }),
+        line_items,
+        mode:'payment',
         success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
         cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
       });
