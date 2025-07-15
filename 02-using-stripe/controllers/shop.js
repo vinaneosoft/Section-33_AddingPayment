@@ -153,6 +153,8 @@ exports.getCheckout = (req, res, next) => {
         total += p.quantity * p.productId.price;
       });
       const line_items=products.map((p)=>{
+        console.log(p);
+        
        return {
           price_data:{
             currency:'inr',
@@ -165,6 +167,8 @@ exports.getCheckout = (req, res, next) => {
         }
       }
       );
+      console.log(line_items);
+      
       return stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items,

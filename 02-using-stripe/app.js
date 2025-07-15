@@ -9,8 +9,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+const helmet = require('helmet');
 require('dotenv').config();
-const helmet=require('helmet');
+
 const compression=require('compression');
 const morgan=require("morgan");
 const errorController = require('./controllers/error');
@@ -59,7 +60,15 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://js.stripe.com'],
+      frameSrc: ["'self'", 'https://js.stripe.com'], // needed for Stripe Checkout
+    },
+  })
+);
 app.use(compression()); 
 
 const accessLogStream=
@@ -135,9 +144,6 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
-     https
-          .createServer({ key: privateKey, cert: certificate }, app)
-           .listen(process.env.PORT || 3000);
    app.listen(process.env.PORT || 3000);
   })
   .catch(err => {

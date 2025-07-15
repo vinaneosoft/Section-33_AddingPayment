@@ -1,7 +1,7 @@
 <%- include('../includes/head.ejs') %>
-    <link rel="stylesheet" href="/css/cart.css">
-    
-    </head>
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' https://js.stripe.com; frame-src 'self' https://js.stripe.com https://checkout.stripe.com;">
+<link rel="stylesheet" href="/css/cart.css">
+</head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
@@ -23,10 +23,13 @@
                 <script>
                     var stripe = Stripe('pk_test_51Ri7yeRh2ABojqq4FFKrEPKCxswsC1QAIngnplOdo9L89tKgbtzKfrtjHrxIzSP3eMla4n23kEBqWhIKfh52ShFT00o1wR5QZr');
                     var orderBtn = document.getElementById('order-btn');
-                    orderBtn.addEventListener('click', function() {
-                        stripe.redirectToCheckout({
+                    orderBtn.addEventListener('click', async function() {
+                    console.log("button clicked......");
+                    
+                    const res= await stripe.redirectToCheckout({
                             sessionId: '<%= sessionId %>'
                         });
+                    console.log(res);
                     });
                 </script>
             </div>
